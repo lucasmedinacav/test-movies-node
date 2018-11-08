@@ -5,7 +5,7 @@ var returnPosts = function (callback) {
     return new Promise((resolve, reject) => {
         CSV({
             csvOptions: {
-                delimiter: ","
+                delimiter: ";"
             },
             file: "./src/main/util/files/posts.csv",
             columns: true
