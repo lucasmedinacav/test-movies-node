@@ -2,8 +2,11 @@ var Posting = require('../models/postingModel');
 let ActionResponse = require('./../util/actionResponse');
 let Logger = require('./../util/logger');
 const request = require('request');
+var redis = require('redis');
 
 module.exports = function (app) {
+
+
     app.get('/posting/findById/:idPosting', async function (req, res) {
         var idPosting = req.params.idPosting;
 
@@ -14,13 +17,29 @@ module.exports = function (app) {
                 res.json(new ActionResponse().send(500, err, {}));
             } else {
                 if (posting && posting.length > 0 && posting[0].movieTitle) {
-                    request('http://www.omdbapi.com/?apikey=5255dfd0&t=' + posting[0].movieTitle, function (err, infos) {
-                        let imdbInfo = null;
-                        if (!err) {
-                            posting[0].imdbInfo = JSON.parse(infos.body);
+                    urlMovie = 'http://www.omdbapi.com/?apikey=5255dfd0&t=' + posting[0].movieTitle;
+                    //FIRST I SEARCH INFO IN REDIS CACHE
+                    app.client.get(urlMovie, function (error, result) {
+                        //IF KEY NOT EXISTS IN REDIS I WILL SEARCH IN API
+                        if (result === null) {
+                            request(urlMovie, function (err, infos) {
+                                //CACHING RESULT
+                                if (infos && infos.body) {
+                                    app.client.set(urlMovie, infos.body, redis.print);
+                                    if (!err) {
+                                        posting[0].imdbInfo = JSON.parse(infos.body);
+                                    }
+                                }
+                                res.json(new ActionResponse().send(200, "Posting was Find", posting[0]));
+                            });
                         }
-                        res.json(new ActionResponse().send(200, "Posting was Find", posting[0]));
+                        //ELSE I ALREADY HAVE VALUE OF THE KEY I USE THE RESULT
+                        else {
+                            posting[0].imdbInfo = JSON.parse(result);
+                            res.json(new ActionResponse().send(200, "Posting was Find", posting[0]));
+                        }
                     });
+
                 } else {
                     res.status(404);
                     res.json(new ActionResponse().send(404, "No posting was find", posting));

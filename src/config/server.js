@@ -3,6 +3,7 @@ let express = require('express');
 let consign = require('consign');
 let bodyParser = require('body-parser');
 let expressValidator = require('express-validator');
+var redis = require('redis');
 
 module.exports = function () {
   let app = express();
@@ -21,6 +22,16 @@ module.exports = function () {
     next();
   });
 
+  var client = redis.createClient('6379', '127.0.0.1');
+  app.client = client;
+
+  client.on('connect', function () {
+    console.log('Redis client connected');
+  });
+
+  client.on('error', function (err) {
+    console.log('Something went wrong ' + err);
+  });
   /**
    * Inicializacao do app com consign, o mesmo carrega todos os modulos informados no ap/express
    */
