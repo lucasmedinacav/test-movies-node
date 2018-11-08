@@ -14,9 +14,10 @@
     -No browser(serviços GET) 
     -No POSTMAN(plugin do chrome que acessa qualquer serviço)
 
-6-para testar os serviços das rotas executar o comando: nodemon app.js
+6-para testar os serviços das rotas executar o comando: npm start
     acesso aos serviço no dominio: http://localhost:3000/.....
 
 Obs
+**Requisitos para subir a API: node instalado (npm), terminal, e postman(para fazer operacoes put,post,delete)
 **Para acesso do mongodb criei um base online no MLAB e acessei via MongoBooster
 **Os arquivos CSV e JSON foram gerados pela API sugerida (mockaroo)
